@@ -10,11 +10,11 @@ export const ORCHESTRA_MAX_PER_ZONE = 4;
 export const ORCHESTRA_CENTER_X     = 683; // SVG units — horizontal center
 export const ORCHESTRA_CENTER_Y     = 900; // SVG units — bottom anchor point
 export const ORCHESTRA_ZONE_RADII: Record<string, { inner: number; outer: number }> = {
-  voice:      { inner: 0,   outer: 160 },
-  strings:    { inner: 165, outer: 300 },
-  wind:       { inner: 305, outer: 430 },
-  brass:      { inner: 435, outer: 555 },
-  percussion: { inner: 560, outer: 680 },
+  megaphones: { inner: 0,   outer: 152 },
+  whistles:   { inner: 163, outer: 298 },
+  brass:      { inner: 309, outer: 428 },
+  percussion: { inner: 439, outer: 558 },
+  chorus:     { inner: 569, outer: 678 },
 };
 export const ORCHESTRA_ARC_START_DEG = 180; // left end of semicircle
 export const ORCHESTRA_ARC_END_DEG   = 0;   // right end

@@ -9,6 +9,7 @@ interface RightPanelShellProps {
 export function RightPanelShell({ children }: RightPanelShellProps) {
   return (
     <Card
+      id="right-panel"
       className="flex flex-col overflow-hidden shrink-0"
       style={{
         width: RIGHT_PANEL_WIDTH,

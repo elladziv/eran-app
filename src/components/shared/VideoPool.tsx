@@ -1,26 +1,36 @@
 import { useRef, useEffect } from 'react'
 import { useAppStore } from '../../store/useAppStore'
-import { INSTRUMENTS } from '../../data/instruments'
 
-/**
- * Renders a pool of hidden <video> elements (one per unique instrument videoUrl).
- * During playback, fires audio whenever the playhead crosses a keyframe boundary.
- * Mount once at the App root.
- */
+// Audio playback pool for the composer. Uses Web Audio API (Audio objects)
+// so no DOM elements are needed. Mount once at the App root.
 export function VideoPool() {
   const tracks    = useAppStore((s) => s.tracks)
   const isPlaying = useAppStore((s) => s.isPlaying)
   const playheadS = useAppStore((s) => s.playheadS)
 
-  // Map videoUrl → HTMLVideoElement ref
-  const videoRefs = useRef<Map<string, HTMLVideoElement>>(new Map())
+  // Map mp3Url → HTMLAudioElement
+  const audioRefs = useRef<Map<string, HTMLAudioElement>>(new Map())
 
-  // Unique video URLs needed across all tracks
-  const uniqueUrls = Array.from(
-    new Set(
-      tracks.map((t) => t.instrument.videoUrl).filter(Boolean),
-    ),
-  )
+  // Unique MP3 URLs in use across all tracks
+  const uniqueUrls = [...new Set(tracks.map((t) => t.instrument.mp3Url))]
+
+  // Keep the audio element map in sync with current tracks
+  useEffect(() => {
+    uniqueUrls.forEach((url) => {
+      if (!audioRefs.current.has(url)) {
+        const audio = new Audio(url)
+        audio.preload = 'auto'
+        audioRefs.current.set(url, audio)
+      }
+    })
+    for (const url of audioRefs.current.keys()) {
+      if (!uniqueUrls.includes(url)) {
+        audioRefs.current.get(url)?.pause()
+        audioRefs.current.delete(url)
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tracks.map((t) => t.instrument.mp3Url).join(',')])
 
   // Fire audio when playhead crosses a keyframe start
   useEffect(() => {
@@ -28,39 +38,19 @@ export function VideoPool() {
 
     tracks.forEach((track) => {
       if (track.isMuted) return
-
       track.keyframes.forEach((kf) => {
         const delta = playheadS - kf.startS
-        // Trigger within one 60fps frame window (~17ms = 0.017s)
         if (delta >= 0 && delta < 0.05) {
-          const video = videoRefs.current.get(track.instrument.videoUrl)
-          if (video) {
-            video.currentTime = 0
-            video.volume = track.volume
-            video.play().catch(() => { /* blocked by browser — ignore */ })
+          const audio = audioRefs.current.get(track.instrument.mp3Url)
+          if (audio) {
+            audio.currentTime = 0
+            audio.volume = track.volume
+            audio.play().catch(() => { /* blocked by browser */ })
           }
         }
       })
     })
   }, [isPlaying, playheadS, tracks])
 
-  return (
-    <div
-      aria-hidden
-      style={{ position: 'absolute', left: -9999, top: -9999, pointerEvents: 'none' }}
-    >
-      {uniqueUrls.map((url) => (
-        <video
-          key={url}
-          src={url}
-          ref={(el) => {
-            if (el) videoRefs.current.set(url, el)
-            else videoRefs.current.delete(url)
-          }}
-          preload="auto"
-          playsInline
-        />
-      ))}
-    </div>
-  )
+  return null
 }

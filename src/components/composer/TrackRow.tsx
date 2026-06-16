@@ -13,6 +13,7 @@ interface TrackRowProps {
 export function TrackRow({ track, pxPerSecond, rowHeight }: TrackRowProps) {
   const addKeyframe    = useAppStore((s) => s.addKeyframe)
   const removeKeyframe = useAppStore((s) => s.removeKeyframe)
+  const removeTrack    = useAppStore((s) => s.removeTrack)
   const setMute        = useAppStore((s) => s.setMute)
   const setSolo        = useAppStore((s) => s.setSolo)
 
@@ -43,6 +44,12 @@ export function TrackRow({ track, pxPerSecond, rowHeight }: TrackRowProps) {
           borderRight: '1px solid var(--color-composer-separator)',
         }}
       >
+        <img
+          src={track.instrument.iconUrl}
+          alt={track.instrument.name}
+          className="w-5 h-5 object-contain shrink-0"
+          style={{ filter: 'invert(1) brightness(0.7)' }}
+        />
         <span
           className="flex-1 text-xs truncate"
           style={{ color: 'var(--color-surface-card)' }}
@@ -51,8 +58,9 @@ export function TrackRow({ track, pxPerSecond, rowHeight }: TrackRowProps) {
         </span>
         <button
           onClick={() => setMute(track.id, !track.isMuted)}
-          className="text-xs rounded px-1 transition-opacity hover:opacity-80"
+          className="text-xs rounded transition-opacity hover:opacity-80"
           style={{
+            padding: '4px',
             backgroundColor: track.isMuted ? 'var(--color-accent-gold)' : 'transparent',
             color: track.isMuted ? 'var(--color-text-primary)' : 'var(--color-border-soft)',
             border: '1px solid var(--color-border-soft)',
@@ -63,8 +71,9 @@ export function TrackRow({ track, pxPerSecond, rowHeight }: TrackRowProps) {
         </button>
         <button
           onClick={() => setSolo(track.id, !track.isSoloed)}
-          className="text-xs rounded px-1 transition-opacity hover:opacity-80"
+          className="text-xs rounded transition-opacity hover:opacity-80"
           style={{
+            padding: '4px',
             backgroundColor: track.isSoloed ? 'var(--color-accent-brown)' : 'transparent',
             color: track.isSoloed ? 'var(--color-surface-inner)' : 'var(--color-border-soft)',
             border: '1px solid var(--color-border-soft)',
@@ -73,11 +82,18 @@ export function TrackRow({ track, pxPerSecond, rowHeight }: TrackRowProps) {
         >
           S
         </button>
+        <button
+          onClick={() => removeTrack(track.id)}
+          className="opacity-40 hover:opacity-80 transition-opacity shrink-0"
+          style={{ padding: '4px', color: 'var(--color-surface-card)', fontSize: 14 }}
+        >
+          ×
+        </button>
       </div>
 
       {/* Timeline lane */}
       <div
-        className="relative flex-1 overflow-hidden"
+        className="relative overflow-hidden"
         style={{
           width: timelineWidth,
           backgroundColor: track.isMuted
@@ -111,16 +127,16 @@ interface KeyframeBlockProps {
 function KeyframeBlock({ keyframe, pxPerSecond, rowHeight, onRemove }: KeyframeBlockProps) {
   const left  = keyframe.startS * pxPerSecond
   const width = Math.max(4, keyframe.durationS * pxPerSecond)
-  const padding = 4
+  const pad = 4
 
   return (
     <div
       className="absolute flex items-center justify-between rounded"
       style={{
         left,
-        top: padding,
+        top: pad,
         width,
-        height: rowHeight - padding * 2,
+        height: rowHeight - pad * 2,
         backgroundColor: 'var(--color-accent-brown)',
         opacity: 0.85,
         overflow: 'hidden',
@@ -128,15 +144,15 @@ function KeyframeBlock({ keyframe, pxPerSecond, rowHeight, onRemove }: KeyframeB
       onClick={(e) => e.stopPropagation()}
     >
       <span
-        className="text-xs px-1 truncate"
+        className="px-1 truncate"
         style={{ color: 'var(--color-surface-inner)', fontSize: 9 }}
       >
         {keyframe.durationS}s
       </span>
       <button
         onClick={(e) => { e.stopPropagation(); onRemove() }}
-        className="px-1 text-xs opacity-60 hover:opacity-100 shrink-0"
-        style={{ color: 'var(--color-surface-inner)' }}
+        className="opacity-60 hover:opacity-100 shrink-0"
+        style={{ padding: '4px', color: 'var(--color-surface-inner)', fontSize: 12 }}
       >
         ×
       </button>

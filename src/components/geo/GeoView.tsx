@@ -1,6 +1,6 @@
 import { useAppStore } from '../../store/useAppStore'
 import { type Country } from '../../types'
-import { INSTRUMENTS } from '../../data/instruments'
+import { VIDEO_FILES } from '../../data/videos'
 
 // Label positions (approximate centroid of each country on the map)
 const COUNTRY_LABEL_POS: Record<Country, { x: number; y: number }> = {
@@ -61,11 +61,9 @@ const MAP_VIEWBOX = '200 100 680 700'
 export function GeoView() {
   const selectedCountry  = useAppStore((s) => s.selectedCountry)
   const selectCountry    = useAppStore((s) => s.selectCountry)
-  const orchestra        = useAppStore((s) => s.orchestra)
+  const orchestraSlots = useAppStore((s) => s.orchestraSlots)
 
-  const countriesWithInstruments = new Set(
-    INSTRUMENTS.map((i) => i.country),
-  )
+  const countriesWithVideos = new Set(VIDEO_FILES.map((v) => v.country))
 
   const handleCountryClick = (country: Country) => {
     selectCountry(selectedCountry === country ? null : country)
@@ -91,8 +89,8 @@ export function GeoView() {
         {/* Country shapes */}
         {Object.entries(COUNTRY_PATHS).map(([key, { country, d }]) => {
           const isSelected = selectedCountry === country
-          const hasInstruments = countriesWithInstruments.has(country)
-          const inOrchestra = orchestra.some((s) => s.instrument.country === country)
+          const hasVideos = countriesWithVideos.has(country)
+          const inOrchestra = orchestraSlots.some((s) => s.video.country === country)
 
           return (
             <g key={key}>
@@ -101,8 +99,8 @@ export function GeoView() {
                 fill={
                   isSelected
                     ? 'var(--color-accent-brown)'
-                    : hasInstruments
-                      ? 'var(--color-category-wind-play)'
+                    : hasVideos
+                      ? 'var(--color-category-chorus-play)'
                       : 'var(--color-bg-pattern-dot)'
                 }
                 stroke="var(--color-surface-inner)"
@@ -111,8 +109,7 @@ export function GeoView() {
                 style={{ cursor: 'pointer', transition: 'fill 0.2s ease' }}
                 onClick={() => handleCountryClick(country)}
               />
-              {/* Instrument count badge */}
-              {hasInstruments && (
+              {hasVideos && (
                 <circle
                   cx={COUNTRY_LABEL_POS[country]?.x ?? 0}
                   cy={(COUNTRY_LABEL_POS[country]?.y ?? 0) - 16}

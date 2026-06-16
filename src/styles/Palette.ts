@@ -25,18 +25,18 @@ export const Palette = {
   composerStripe:     'rgba(227,211,195,0.60)',
   composerSeparator:  'rgba(255,255,255,0.25)',
 
-  // ── Orchestra category — edit mode (faded) ────────────────────────
-  categoryVoiceEdit:      'rgba(224,138,124,0.30)',
-  categoryStringsEdit:    'rgba(228,189,90,0.30)',
-  categoryWindEdit:       'rgba(215,224,209,0.45)',
-  categoryBrassEdit:      'rgba(171,199,214,0.40)',
-  categoryPercussionEdit: 'rgba(216,158,106,0.30)',
+  // ── Orchestra category — baseline (50% desaturated from play colors) ─
+  categoryChorusEdit:     '#c19690',
+  categoryMegaphonesEdit: '#c6b382',
+  categoryBrassEdit:      '#b7c5cd',
+  categoryWhistlesEdit:   '#d8dcd5',
+  categoryPercussionEdit: '#bc9f85',
 
   // ── Orchestra category — play mode (vibrant) ──────────────────────
-  categoryVoicePlay:      '#e08a7c',
-  categoryStringsPlay:    '#e4bd5a',
-  categoryWindPlay:       '#d7e0d1',
+  categoryChorusPlay:     '#e08a7c',
+  categoryMegaphonesPlay: '#e4bd5a',
   categoryBrassPlay:      '#abc7d6',
+  categoryWhistlesPlay:   '#d7e0d1',
   categoryPercussionPlay: '#d89e6a',
 } as const;
 

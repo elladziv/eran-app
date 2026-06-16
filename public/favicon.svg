@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <rect width="100" height="100" rx="16" fill="#1c1a18"/>
+  <!-- logo: 244×141.36 → scale to width=88, height=51, centered -->
+  <image href="./main-logo.svg" x="6" y="24.5" width="88" height="51"/>
+</svg>

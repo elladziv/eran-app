@@ -8,6 +8,7 @@ interface ComposerTriggerBarProps {
 export function ComposerTriggerBar({ isOpen, onToggle }: ComposerTriggerBarProps) {
   return (
     <button
+      id="composer-trigger"
       onClick={onToggle}
       className="w-full flex items-center justify-center gap-3 transition-opacity hover:opacity-80"
       style={{

@@ -1,5 +1,15 @@
 import { create } from 'zustand'
-import { type AppState, type Country, type Instrument, type Keyframe, type OrchestraCategory, type OrchestraMode, type SelectedInstrument, type Track } from '../types'
+import {
+  type AppState,
+  type Country,
+  type Keyframe,
+  type MixerInstrument,
+  type OrchestraCategory,
+  type OrchestraMode,
+  type OrchestraSlot,
+  type Track,
+  type VideoFile,
+} from '../types'
 import { COMPOSER_MAX_TRACKS, ORCHESTRA_MAX_PER_ZONE, TIMELINE_DURATION_S } from '../styles/constants'
 
 function uuid(): string {
@@ -11,16 +21,16 @@ function snapToGrid(seconds: number, snap: number): number {
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
-  // Initial navigation state
+  // Navigation
   selectedCategory: null,
   selectedCountry: null,
-  previewedInstrumentId: null,
+  previewedVideoId: null,
   orchestraMode: 'edit',
 
-  // Initial orchestra
-  orchestra: [],
+  // Orchestra
+  orchestraSlots: [],
 
-  // Initial composer
+  // Composer
   tracks: [],
   isPlaying: false,
   isComposerOpen: false,
@@ -34,37 +44,42 @@ export const useAppStore = create<AppState>((set, get) => ({
   selectCountry: (country: Country | null) =>
     set({ selectedCountry: country, selectedCategory: null }),
 
-  previewInstrument: (instrumentId: string | null) =>
-    set({ previewedInstrumentId: instrumentId }),
+  previewVideo: (videoId: string | null) =>
+    set({ previewedVideoId: videoId }),
 
   setOrchestraMode: (mode: OrchestraMode) =>
     set({ orchestraMode: mode }),
 
   // --- Orchestra actions ---
 
-  addToOrchestra: (instrument: Instrument) => {
+  addToOrchestra: (video: VideoFile, category: OrchestraCategory) => {
     const state = get()
 
-    // Enforce per-category max
-    const inCategory = state.orchestra.filter(
-      (s) => s.instrument.category === instrument.category,
-    )
+    const inCategory = state.orchestraSlots.filter((s) => s.category === category)
     if (inCategory.length >= ORCHESTRA_MAX_PER_ZONE) return
 
-    // Enforce global composer max
-    if (state.orchestra.length >= COMPOSER_MAX_TRACKS) return
-
-    const trackId = uuid()
-    const selected: SelectedInstrument = {
-      instrument,
-      trackId,
-      isMuted: false,
-      isSoloed: false,
-      volume: 1,
+    const slot: OrchestraSlot = {
+      slotId: uuid(),
+      video,
+      category,
     }
 
+    set((s) => ({ orchestraSlots: [...s.orchestraSlots, slot] }))
+  },
+
+  removeFromOrchestra: (slotId: string) =>
+    set((s) => ({
+      orchestraSlots: s.orchestraSlots.filter((slot) => slot.slotId !== slotId),
+    })),
+
+  // --- Composer track actions ---
+
+  addTrack: (instrument: MixerInstrument) => {
+    const state = get()
+    if (state.tracks.length >= COMPOSER_MAX_TRACKS) return
+
     const track: Track = {
-      id: trackId,
+      id: uuid(),
       instrument,
       isMuted: false,
       isSoloed: false,
@@ -72,23 +87,16 @@ export const useAppStore = create<AppState>((set, get) => ({
       keyframes: [],
     }
 
-    set((s) => ({
-      orchestra: [...s.orchestra, selected],
-      tracks: [...s.tracks, track],
-    }))
+    set((s) => ({ tracks: [...s.tracks, track] }))
   },
 
-  removeFromOrchestra: (trackId: string) =>
+  removeTrack: (trackId: string) =>
     set((s) => ({
-      orchestra: s.orchestra.filter((sel) => sel.trackId !== trackId),
       tracks: s.tracks.filter((t) => t.id !== trackId),
     })),
 
   setMute: (trackId: string, muted: boolean) =>
     set((s) => ({
-      orchestra: s.orchestra.map((sel) =>
-        sel.trackId === trackId ? { ...sel, isMuted: muted } : sel,
-      ),
       tracks: s.tracks.map((t) =>
         t.id === trackId ? { ...t, isMuted: muted } : t,
       ),
@@ -96,9 +104,6 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   setSolo: (trackId: string, soloed: boolean) =>
     set((s) => ({
-      orchestra: s.orchestra.map((sel) =>
-        sel.trackId === trackId ? { ...sel, isSoloed: soloed } : sel,
-      ),
       tracks: s.tracks.map((t) =>
         t.id === trackId ? { ...t, isSoloed: soloed } : t,
       ),
@@ -106,9 +111,6 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   setVolume: (trackId: string, volume: number) =>
     set((s) => ({
-      orchestra: s.orchestra.map((sel) =>
-        sel.trackId === trackId ? { ...sel, volume } : sel,
-      ),
       tracks: s.tracks.map((t) =>
         t.id === trackId ? { ...t, volume } : t,
       ),

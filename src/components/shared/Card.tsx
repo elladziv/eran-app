@@ -4,11 +4,13 @@ interface CardProps {
   children: ReactNode
   className?: string
   style?: React.CSSProperties
+  id?: string
 }
 
-export function Card({ children, className = '', style }: CardProps) {
+export function Card({ children, className = '', style, id }: CardProps) {
   return (
     <div
+      id={id}
       className={`rounded-xl ${className}`}
       style={{
         backgroundColor: 'var(--color-surface-card)',

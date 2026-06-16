@@ -1,60 +1,59 @@
-import { Card } from '../shared/Card'
-import { TabSwitcher, type AppTab } from './TabSwitcher'
+import { Card } from "../shared/Card";
+import { TabSwitcher, type AppTab } from "./TabSwitcher";
 
-const NAV_LINKS = [
-  'אודות',
-  'הוספת רדיו לארכיון',
-  'קטעי תחקור',
-  'ארכיון הקשבה',
-]
+const NAV_LINKS = ["אודות", "הוספת רדיו לארכיון", "קטעי תחקור", "ארכיון הקשבה"];
 
 interface HeaderProps {
-  activeTab: AppTab
-  onTabChange: (tab: AppTab) => void
+  activeTab: AppTab;
+  onTabChange: (tab: AppTab) => void;
 }
 
 export function Header({ activeTab, onTabChange }: HeaderProps) {
   return (
-    <div className="px-6 pt-5 pb-0">
-      <Card className="overflow-hidden" style={{ padding: 0 }}>
-        {/* Top row: logo | nav | language */}
+    <div id="header" className=" pb-0 shrink-0">
+      <Card className="overflow-hidden flex flex-col" style={{ padding: 0 }}>
+        {/* Top row — flex with RTL direction (inherited from html[dir=rtl]).
+            In RTL flex-row: first child = right, last child = left.
+            Logo first → appears on RIGHT. Language last → appears on LEFT. */}
         <div
-          className="flex items-center justify-between px-8 py-4"
-          style={{ minHeight: 72 }}
+          className="flex items-center justify-between px-8 py-5"
+          style={{ minHeight: 76 }}
         >
-          {/* Language switcher (start = right in RTL) */}
-          <div
-            className="text-xs"
-            style={{ color: 'var(--color-text-secondary)', fontWeight: 500 }}
-          >
-            עברית&nbsp;|&nbsp;English
-          </div>
+          {/* Logo — DOM first → visual RIGHT in RTL */}
+          <img
+            src="/main-logo.svg"
+            alt="סאונד אוף פרוטסט"
+            className="h-12 w-auto"
+          />
 
-          {/* Nav links (center) */}
+          {/* Nav links — center */}
           <nav className="flex gap-8">
             {NAV_LINKS.map((link) => (
               <a
                 key={link}
                 href="#"
                 className="text-sm transition-opacity hover:opacity-60"
-                style={{ color: 'var(--color-text-secondary)', fontWeight: 500 }}
+                style={{
+                  color: "var(--color-text-secondary)",
+                  fontWeight: 500,
+                }}
               >
                 {link}
               </a>
             ))}
           </nav>
 
-          {/* Logo (end = left in RTL) */}
-          <img
-            src="/main-logo.svg"
-            alt="סאונד אוף פרוטסט"
-            className="h-12 w-auto"
-          />
+          {/* Language switcher — DOM last → visual LEFT in RTL */}
+          <div
+            className="text-sm"
+            style={{ color: "var(--color-text-secondary)", fontWeight: 500 }}
+          >
+            עברית&nbsp;|&nbsp;English
+          </div>
         </div>
 
-        {/* Tab switcher strip */}
         <TabSwitcher activeTab={activeTab} onChange={onTabChange} />
       </Card>
     </div>
-  )
+  );
 }

@@ -1,37 +1,45 @@
-export type AppTab = 'orchestra' | 'geo'
+export type AppTab = "orchestra" | "geo";
 
 const TAB_LABELS: Record<AppTab, string> = {
-  orchestra: 'סגנון אקוסטי - כלים',
-  geo:       'סגנון מזרחי - גאוגרפי',
-}
+  orchestra: "סינון אקוסטי - כלים",
+  geo: "סינון מרחבי - גאוגרפי",
+};
 
 interface TabSwitcherProps {
-  activeTab: AppTab
-  onChange: (tab: AppTab) => void
+  activeTab: AppTab;
+  onChange: (tab: AppTab) => void;
 }
 
 export function TabSwitcher({ activeTab, onChange }: TabSwitcherProps) {
   return (
-    <div className="flex flex-row-reverse">
-      {(['orchestra', 'geo'] as AppTab[]).map((tab) => {
-        const isActive = tab === activeTab
+    <div
+      className="inline-flex"
+      style={{
+        alignSelf: "flex-end",
+        borderTopRightRadius: "3px",
+        overflow: "hidden",
+      }}
+    >
+      {(["orchestra", "geo"] as AppTab[]).map((tab) => {
+        const isActive = tab === activeTab;
         return (
           <button
             key={tab}
             onClick={() => onChange(tab)}
-            className="px-8 py-3 text-sm font-medium transition-colors"
+            className="text-sm font-medium transition-colors"
             style={{
-              color: 'var(--color-text-secondary)',
+              padding: "4px 12px",
+              color: "var(--color-text-secondary)",
               backgroundColor: isActive
-                ? 'var(--color-surface-inner)'
-                : 'rgba(153,134,117,0.21)',
+                ? "var(--color-surface-inner)"
+                : "rgba(153,134,117,0.21)",
               fontWeight: isActive ? 700 : 500,
             }}
           >
             {TAB_LABELS[tab]}
           </button>
-        )
+        );
       })}
     </div>
-  )
+  );
 }
