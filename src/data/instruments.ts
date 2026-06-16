@@ -1,13 +1,3 @@
-import { type Instrument } from '../types'
-
-export const INSTRUMENTS: Instrument[] = [
-  {
-    id: 'israel-wind-1',
-    name: 'כלי נשיפה',
-    category: 'wind',
-    country: 'israel',
-    countryLabel: 'ישראל',
-    videoUrl: '/instruments/israel-wind.mp4',
-    description: 'כלי נשיפה מסורתיים ממסורת המוזיקה הישראלית',
-  },
-]
+// Deprecated — use mixerInstruments.ts (MIXER_INSTRUMENTS) for composer tracks
+//              and videos.ts (VIDEO_FILES) for orchestra/map views.
+export {}
