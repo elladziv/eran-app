@@ -5,9 +5,16 @@ const MINOR_TICK_EVERY_S = 1   // tick mark every second
 
 interface TimelineRulerProps {
   pxPerSecond: number
+  onSeek: (seconds: number) => void
 }
 
-export function TimelineRuler({ pxPerSecond }: TimelineRulerProps) {
+export function TimelineRuler({ pxPerSecond, onSeek }: TimelineRulerProps) {
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    const clickX = e.clientX - rect.left
+    const seconds = Math.max(0, Math.min(clickX / pxPerSecond, TIMELINE_DURATION_S))
+    onSeek(seconds)
+  }
   const majorTicks: number[] = []
   const minorTicks: number[] = []
 
@@ -26,7 +33,9 @@ export function TimelineRuler({ pxPerSecond }: TimelineRulerProps) {
         width: TIMELINE_DURATION_S * pxPerSecond,
         height: 28,
         borderBottom: '1px solid var(--color-composer-separator)',
+        cursor: 'pointer',
       }}
+      onClick={handleClick}
     >
       {minorTicks.map((s) => (
         <div

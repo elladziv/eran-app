@@ -184,7 +184,7 @@ export function ComposerPanel() {
                     borderBottom: '1px solid var(--color-composer-separator)',
                   }}
                 />
-                <TimelineRuler pxPerSecond={PX_PER_SECOND} />
+                <TimelineRuler pxPerSecond={PX_PER_SECOND} onSeek={setPlayhead} />
               </div>
 
               {tracks.map((track) => (

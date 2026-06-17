@@ -13,12 +13,15 @@ export interface VideoFile {
   thumbnailUrl?: string
 }
 
-// One of the 10 fixed mixer instruments (for composer + orchestra play mode)
+// One of the fixed mixer instruments (for composer + orchestra play mode)
 export interface MixerInstrument {
   id: string
   name: string                // Hebrew display name
   category: OrchestraCategory
-  mp3Url: string              // relative path, e.g. '/audio/oud.mp3'
+  country: Country
+  countryLabel: string        // Hebrew country name
+  audioUrl: string            // relative path — .mp3 or .m4a
+  durationS: number           // clip duration in seconds
   iconUrl: string             // path to icon served from /public, e.g. '/icons/small/Asset 1.svg'
 }
 

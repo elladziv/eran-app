@@ -1,38 +1,60 @@
 import { useRef, useEffect } from 'react'
 import { useAppStore } from '../../store/useAppStore'
 
-// Audio playback pool for the composer. Uses Web Audio API (Audio objects)
-// so no DOM elements are needed. Mount once at the App root.
 export function VideoPool() {
   const tracks    = useAppStore((s) => s.tracks)
   const isPlaying = useAppStore((s) => s.isPlaying)
   const playheadS = useAppStore((s) => s.playheadS)
 
-  // Map mp3Url → HTMLAudioElement
-  const audioRefs = useRef<Map<string, HTMLAudioElement>>(new Map())
+  const audioRefs    = useRef<Map<string, HTMLAudioElement>>(new Map())
+  const prevPlayhead = useRef(playheadS)
 
-  // Unique MP3 URLs in use across all tracks
-  const uniqueUrls = [...new Set(tracks.map((t) => t.instrument.mp3Url))]
+  const stopAll = () => {
+    audioRefs.current.forEach((audio) => {
+      audio.pause()
+      audio.currentTime = 0
+    })
+  }
 
-  // Keep the audio element map in sync with current tracks
+  // Flat list of { keyframeId, audioUrl } for all tracks
+  const kfAudioList = tracks.flatMap((t) =>
+    t.keyframes.map((kf) => ({ id: kf.id, audioUrl: t.instrument.audioUrl })),
+  )
+
+  // Keep audio map in sync with current keyframes
   useEffect(() => {
-    uniqueUrls.forEach((url) => {
-      if (!audioRefs.current.has(url)) {
-        const audio = new Audio(url)
+    kfAudioList.forEach(({ id, audioUrl }) => {
+      if (!audioRefs.current.has(id)) {
+        const audio = new Audio(audioUrl)
         audio.preload = 'auto'
-        audioRefs.current.set(url, audio)
+        audioRefs.current.set(id, audio)
       }
     })
-    for (const url of audioRefs.current.keys()) {
-      if (!uniqueUrls.includes(url)) {
-        audioRefs.current.get(url)?.pause()
-        audioRefs.current.delete(url)
+    const liveIds = new Set(kfAudioList.map((k) => k.id))
+    for (const id of audioRefs.current.keys()) {
+      if (!liveIds.has(id)) {
+        audioRefs.current.get(id)?.pause()
+        audioRefs.current.delete(id)
       }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tracks.map((t) => t.instrument.mp3Url).join(',')])
+  }, [kfAudioList.map((k) => k.id).join(',')])
 
-  // Fire audio when playhead crosses a keyframe start
+  // Stop all audio on pause / stop / end
+  useEffect(() => {
+    if (!isPlaying) stopAll()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPlaying])
+
+  // Stop all audio on seek (playhead jumps more than one normal tick)
+  useEffect(() => {
+    const delta = Math.abs(playheadS - prevPlayhead.current)
+    if (delta > 0.1) stopAll()
+    prevPlayhead.current = playheadS
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playheadS])
+
+  // Trigger each keyframe's audio when the playhead crosses its start
   useEffect(() => {
     if (!isPlaying) return
 
@@ -41,11 +63,11 @@ export function VideoPool() {
       track.keyframes.forEach((kf) => {
         const delta = playheadS - kf.startS
         if (delta >= 0 && delta < 0.05) {
-          const audio = audioRefs.current.get(track.instrument.mp3Url)
+          const audio = audioRefs.current.get(kf.id)
           if (audio) {
             audio.currentTime = 0
             audio.volume = track.volume
-            audio.play().catch(() => { /* blocked by browser */ })
+            audio.play().catch(() => { /* autoplay blocked */ })
           }
         }
       })

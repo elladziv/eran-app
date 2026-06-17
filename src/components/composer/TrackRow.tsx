@@ -1,8 +1,7 @@
-import { type Track, type Keyframe } from '../../types'
+import { useRef, useState } from 'react'
+import { type Track, type Keyframe, type OrchestraCategory } from '../../types'
 import { useAppStore } from '../../store/useAppStore'
 import { TIMELINE_DURATION_S, TIMELINE_SNAP_S } from '../../styles/constants'
-
-const KEYFRAME_DEFAULT_DURATION_S = 3
 
 interface TrackRowProps {
   track: Track
@@ -24,7 +23,7 @@ export function TrackRow({ track, pxPerSecond, rowHeight }: TrackRowProps) {
     const clickX = e.clientX - rect.left
     const startS = Math.max(0, clickX / pxPerSecond)
     const snapped = Math.round(startS / TIMELINE_SNAP_S) * TIMELINE_SNAP_S
-    addKeyframe(track.id, snapped, KEYFRAME_DEFAULT_DURATION_S)
+    addKeyframe(track.id, snapped, track.instrument.durationS)
   }
 
   return (
@@ -85,7 +84,7 @@ export function TrackRow({ track, pxPerSecond, rowHeight }: TrackRowProps) {
         <button
           onClick={() => removeTrack(track.id)}
           className="opacity-40 hover:opacity-80 transition-opacity shrink-0"
-          style={{ padding: '4px', color: 'var(--color-surface-card)', fontSize: 14 }}
+          style={{ padding: '4px 6px', color: 'var(--color-surface-card)', fontSize: 20, lineHeight: 1 }}
         >
           ×
         </button>
@@ -107,6 +106,7 @@ export function TrackRow({ track, pxPerSecond, rowHeight }: TrackRowProps) {
           <KeyframeBlock
             key={kf.id}
             keyframe={kf}
+            category={track.instrument.category}
             pxPerSecond={pxPerSecond}
             rowHeight={rowHeight}
             onRemove={() => removeKeyframe(kf.id)}
@@ -119,15 +119,51 @@ export function TrackRow({ track, pxPerSecond, rowHeight }: TrackRowProps) {
 
 interface KeyframeBlockProps {
   keyframe: Keyframe
+  category: OrchestraCategory
   pxPerSecond: number
   rowHeight: number
   onRemove: () => void
 }
 
-function KeyframeBlock({ keyframe, pxPerSecond, rowHeight, onRemove }: KeyframeBlockProps) {
-  const left  = keyframe.startS * pxPerSecond
+function KeyframeBlock({ keyframe, category, pxPerSecond, rowHeight, onRemove }: KeyframeBlockProps) {
+  const moveKeyframe = useAppStore((s) => s.moveKeyframe)
+
+  const [dragLeft, setDragLeft] = useState<number | null>(null)
+  const dragRef = useRef<{ startX: number; startS: number } | null>(null)
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    dragRef.current = { startX: e.clientX, startS: keyframe.startS }
+    setDragLeft(keyframe.startS * pxPerSecond)
+
+    const onMove = (me: MouseEvent) => {
+      if (!dragRef.current) return
+      const deltaS = (me.clientX - dragRef.current.startX) / pxPerSecond
+      const clamped = Math.max(0, Math.min(dragRef.current.startS + deltaS, TIMELINE_DURATION_S - keyframe.durationS))
+      setDragLeft(clamped * pxPerSecond)
+    }
+
+    const onUp = (me: MouseEvent) => {
+      if (!dragRef.current) return
+      const deltaS = (me.clientX - dragRef.current.startX) / pxPerSecond
+      const clamped = Math.max(0, Math.min(dragRef.current.startS + deltaS, TIMELINE_DURATION_S - keyframe.durationS))
+      moveKeyframe(keyframe.id, clamped)
+      dragRef.current = null
+      setDragLeft(null)
+      window.removeEventListener('mousemove', onMove)
+      window.removeEventListener('mouseup', onUp)
+    }
+
+    window.addEventListener('mousemove', onMove)
+    window.addEventListener('mouseup', onUp)
+  }
+
+  const isDragging = dragLeft !== null
+  const left  = isDragging ? dragLeft! : keyframe.startS * pxPerSecond
   const width = Math.max(4, keyframe.durationS * pxPerSecond)
-  const pad = 4
+  const pad   = 4
 
   return (
     <div
@@ -137,10 +173,14 @@ function KeyframeBlock({ keyframe, pxPerSecond, rowHeight, onRemove }: KeyframeB
         top: pad,
         width,
         height: rowHeight - pad * 2,
-        backgroundColor: 'var(--color-accent-brown)',
-        opacity: 0.85,
+        backgroundColor: `var(--color-category-${category}-play)`,
+        opacity: isDragging ? 1 : 0.85,
         overflow: 'hidden',
+        cursor: isDragging ? 'grabbing' : 'grab',
+        userSelect: 'none',
+        zIndex: isDragging ? 999 : Math.round(keyframe.startS * 10),
       }}
+      onMouseDown={handleMouseDown}
       onClick={(e) => e.stopPropagation()}
     >
       <span
@@ -150,9 +190,10 @@ function KeyframeBlock({ keyframe, pxPerSecond, rowHeight, onRemove }: KeyframeB
         {keyframe.durationS}s
       </span>
       <button
+        onMouseDown={(e) => e.stopPropagation()}
         onClick={(e) => { e.stopPropagation(); onRemove() }}
-        className="opacity-60 hover:opacity-100 shrink-0"
-        style={{ padding: '4px', color: 'var(--color-surface-inner)', fontSize: 12 }}
+        className="opacity-70 hover:opacity-100 shrink-0 flex items-center justify-center"
+        style={{ padding: '4px 6px', color: 'var(--color-surface-inner)', fontSize: 18, lineHeight: 1 }}
       >
         ×
       </button>
