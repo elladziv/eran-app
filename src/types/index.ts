@@ -1,6 +1,18 @@
-export type OrchestraCategory = 'chorus' | 'percussion' | 'brass' | 'whistles' | 'megaphones'
+export type OrchestraCategory = 'chorus' | 'percussion' | 'brass' | 'string' | 'megaphones'
 
 export type Country = 'israel' | 'palestine' | 'jordan' | 'lebanon' | 'egypt' | 'syria' | 'iraq' | 'turkey' | 'iran'
+
+export type InstrumentType =
+  | 'air-horn'
+  | 'crowd'
+  | 'darbuka'
+  | 'drum'
+  | 'megaphone'
+  | 'oud'
+  | 'pot'
+  | 'tambourine'
+  | 'vuvuzela'
+  | 'whistle'
 
 // A video file browsed in the orchestra/geo map views
 export interface VideoFile {
@@ -8,8 +20,9 @@ export interface VideoFile {
   title: string               // Hebrew display title
   country: Country
   countryLabel: string        // Hebrew country name
-  categories: OrchestraCategory[]  // which instrument families appear in this video
-  videoUrl: string            // relative path, e.g. '/instruments/israel-wind.mp4'
+  categories: OrchestraCategory[]
+  instruments: InstrumentType[] // instrument types audible in this video
+  videoUrl: string
   thumbnailUrl?: string
 }
 
@@ -18,56 +31,54 @@ export interface MixerInstrument {
   id: string
   name: string                // Hebrew display name
   category: OrchestraCategory
+  instrumentType: InstrumentType
   country: Country
-  countryLabel: string        // Hebrew country name
+  countryLabel: string
   audioUrl: string            // relative path — .mp3 or .m4a
   durationS: number           // clip duration in seconds
-  iconUrl: string             // path to icon served from /public, e.g. '/icons/small/Asset 1.svg'
+  iconUrl: string
 }
 
-// A video placed in an orchestra category zone (no audio — visual only)
+// A video placed in an orchestra category zone
 export interface OrchestraSlot {
-  slotId: string              // UUID
+  slotId: string
   video: VideoFile
-  category: OrchestraCategory // which zone it's placed in (must be in video.categories)
+  category: OrchestraCategory
+  instrumentType?: InstrumentType // present for instrument-backed slots
 }
 
 export interface Keyframe {
   id: string
   trackId: string
-  startS: number              // seconds from timeline start
-  durationS: number           // clip duration in seconds
+  startS: number
+  durationS: number
 }
 
-// A composer track — always uses a MixerInstrument (mp3-based)
 export interface Track {
   id: string
   instrument: MixerInstrument
   isMuted: boolean
   isSoloed: boolean
-  volume: number              // 0–1
+  volume: number
   keyframes: Keyframe[]
 }
 
 export type OrchestraMode = 'edit' | 'play'
 
 export interface AppState {
-  // Navigation
   selectedCategory: OrchestraCategory | null
   selectedCountry: Country | null
   previewedVideoId: string | null
   orchestraMode: OrchestraMode
 
-  // Orchestra (video files placed in zones — visual only)
   orchestraSlots: OrchestraSlot[]
+  selectedSlots: OrchestraSlot[]
 
-  // Composer (MP3 mixer instruments on a timeline)
   tracks: Track[]
   isPlaying: boolean
   isComposerOpen: boolean
   playheadS: number
 
-  // Actions
   selectCategory: (category: OrchestraCategory | null) => void
   selectCountry: (country: Country | null) => void
   previewVideo: (videoId: string | null) => void
@@ -75,6 +86,9 @@ export interface AppState {
 
   addToOrchestra: (video: VideoFile, category: OrchestraCategory) => void
   removeFromOrchestra: (slotId: string) => void
+
+  addToSelection: (slotId: string) => void
+  removeFromSelection: (slotId: string) => void
 
   addTrack: (instrument: MixerInstrument) => void
   removeTrack: (trackId: string) => void

@@ -11,6 +11,24 @@ import {
   type VideoFile,
 } from '../types'
 import { COMPOSER_MAX_TRACKS, ORCHESTRA_MAX_PER_ZONE, TIMELINE_DURATION_S } from '../styles/constants'
+import { MIXER_INSTRUMENTS } from '../data/mixerInstruments'
+
+// Pre-seat all mixer instruments in their orchestra zones
+const INITIAL_SLOTS: OrchestraSlot[] = MIXER_INSTRUMENTS.map((inst) => ({
+  slotId: `${inst.id}-slot`,
+  video: {
+    id: inst.id,
+    title: inst.name,
+    country: inst.country,
+    countryLabel: inst.countryLabel,
+    categories: [inst.category],
+    instruments: [inst.instrumentType],
+    videoUrl: inst.audioUrl,
+    thumbnailUrl: inst.iconUrl,
+  },
+  category: inst.category,
+  instrumentType: inst.instrumentType,
+}))
 
 function uuid(): string {
   return Math.random().toString(36).slice(2) + Date.now().toString(36)
@@ -27,8 +45,11 @@ export const useAppStore = create<AppState>((set, get) => ({
   previewedVideoId: null,
   orchestraMode: 'edit',
 
-  // Orchestra
-  orchestraSlots: [],
+  // Orchestra — pre-seeded with all 16 instruments in their zones
+  orchestraSlots: INITIAL_SLOTS,
+
+  // Selection panel — empty by default, user builds it by clicking arc slices
+  selectedSlots: [],
 
   // Composer
   tracks: [],
@@ -70,6 +91,22 @@ export const useAppStore = create<AppState>((set, get) => ({
   removeFromOrchestra: (slotId: string) =>
     set((s) => ({
       orchestraSlots: s.orchestraSlots.filter((slot) => slot.slotId !== slotId),
+    })),
+
+  addToSelection: (slotId: string) => {
+    const state = get()
+    const isSelected = state.selectedSlots.some((s) => s.slotId === slotId)
+    if (isSelected) {
+      set((s) => ({ selectedSlots: s.selectedSlots.filter((sl) => sl.slotId !== slotId) }))
+    } else {
+      const slot = state.orchestraSlots.find((s) => s.slotId === slotId)
+      if (slot) set((s) => ({ selectedSlots: [...s.selectedSlots, slot] }))
+    }
+  },
+
+  removeFromSelection: (slotId: string) =>
+    set((s) => ({
+      selectedSlots: s.selectedSlots.filter((sl) => sl.slotId !== slotId),
     })),
 
   // --- Composer track actions ---

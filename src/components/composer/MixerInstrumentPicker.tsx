@@ -6,7 +6,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   chorus:     'מקהלה',
   megaphones: 'מגפון',
   brass:      'נשיפה',
-  whistles:   'משרוקיות',
+  string:     'מיתר',
   percussion: 'הקשה',
 }
 

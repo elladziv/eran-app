@@ -29,14 +29,14 @@ export const Palette = {
   categoryChorusEdit:     '#c19690',
   categoryMegaphonesEdit: '#c6b382',
   categoryBrassEdit:      '#b7c5cd',
-  categoryWhistlesEdit:   '#d8dcd5',
+  categoryStringEdit:     '#d8dcd5',
   categoryPercussionEdit: '#bc9f85',
 
   // ── Orchestra category — play mode (vibrant) ──────────────────────
   categoryChorusPlay:     '#e08a7c',
   categoryMegaphonesPlay: '#e4bd5a',
   categoryBrassPlay:      '#abc7d6',
-  categoryWhistlesPlay:   '#d7e0d1',
+  categoryStringPlay:     '#d7e0d1',
   categoryPercussionPlay: '#d89e6a',
 } as const;
 

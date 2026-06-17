@@ -5,7 +5,7 @@ import { buildArcSlicePath } from '../../utils/arcPath'
 import { ArcZone } from './ArcZone'
 
 // innermost → outermost; rendering uses .reverse() so outer draws first (behind inner)
-const CATEGORIES: OrchestraCategory[] = ['megaphones', 'whistles', 'brass', 'percussion', 'chorus']
+const CATEGORIES: OrchestraCategory[] = ['megaphones', 'string', 'brass', 'percussion', 'chorus']
 
 const SVG_VIEWBOX = '0 160 1366 740'
 
@@ -15,7 +15,7 @@ export function OrchestraView() {
   const orchestraSlots   = useAppStore((s) => s.orchestraSlots)
   const selectCategory   = useAppStore((s) => s.selectCategory)
   const setOrchestraMode = useAppStore((s) => s.setOrchestraMode)
-  const previewVideo     = useAppStore((s) => s.previewVideo)
+  const addToSelection   = useAppStore((s) => s.addToSelection)
 
   const cx = ORCHESTRA_CENTER_X
   const cy = ORCHESTRA_CENTER_Y
@@ -38,7 +38,7 @@ export function OrchestraView() {
           border: '1px solid var(--color-border-soft)',
         }}
       >
-        {orchestraMode === 'play' ? 'מצב נגינה' : 'מצב עריכה'}
+        {orchestraMode === 'play' ? 'מצב נגינה' : 'מצב סינון'}
       </button>
 
       <svg
@@ -68,8 +68,12 @@ export function OrchestraView() {
                 selectCategory(selectedCategory === category ? null : category)
               }}
               onSliceClick={(slotId) => {
-                const slot = orchestraSlots.find((s) => s.slotId === slotId)
-                if (slot) previewVideo(slot.video.id)
+                if (orchestraMode === 'play') {
+                  const slot = orchestraSlots.find((s) => s.slotId === slotId)
+                  if (slot) new Audio(slot.video.videoUrl).play().catch(() => {})
+                } else {
+                  addToSelection(slotId)
+                }
               }}
             />
           )

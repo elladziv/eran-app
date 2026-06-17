@@ -1,30 +1,41 @@
+import { useEffect } from 'react'
 import { useAppStore } from '../../store/useAppStore'
 import { VIDEO_FILES } from '../../data/videos'
 import { VideoPlayer } from './VideoPlayer'
 import { InstrumentCard } from './InstrumentCard'
 
 export function RightPanel() {
-  const selectedCategory = useAppStore((s) => s.selectedCategory)
   const selectedCountry  = useAppStore((s) => s.selectedCountry)
+  const selectedSlots    = useAppStore((s) => s.selectedSlots)
   const previewedVideoId = useAppStore((s) => s.previewedVideoId)
+  const previewVideo     = useAppStore((s) => s.previewVideo)
 
-  // Filter video files by active selection
+  // Unique instrument types from selected orchestra instruments
+  const selectedTypes = [...new Set(
+    selectedSlots.map((s) => s.instrumentType).filter(Boolean)
+  )]
+  const hasFilters = selectedCountry !== null || selectedTypes.length > 0
+
   const visibleVideos = VIDEO_FILES.filter((v) => {
-    if (selectedCategory) return v.categories.includes(selectedCategory)
-    if (selectedCountry)  return v.country === selectedCountry
+    if (selectedCountry && v.country !== selectedCountry) return false
+    if (selectedTypes.length > 0) {
+      return selectedTypes.every((type) => v.instruments.includes(type!))
+    }
     return true
   })
 
-  // Determine which video to show in the player
-  const previewedVideo =
-    VIDEO_FILES.find((v) => v.id === previewedVideoId) ??
-    (visibleVideos.length === 1 ? visibleVideos[0] : null)
+  // Clear player when the currently previewed video is filtered out
+  const filterKey = `${selectedCountry ?? ''}|${[...selectedTypes].sort().join(',')}`
+  useEffect(() => {
+    if (previewedVideoId && !visibleVideos.some((v) => v.id === previewedVideoId)) {
+      previewVideo(null)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterKey, previewedVideoId])
 
-  const listLabel = selectedCategory
-    ? 'סרטונים בקטגוריה'
-    : selectedCountry
-      ? 'סרטונים מהמדינה'
-      : 'כל הסרטונים'
+  const previewedVideo = VIDEO_FILES.find((v) => v.id === previewedVideoId) ?? null
+
+  const listLabel = hasFilters ? 'סרטונים מסוננים' : 'כל הסרטונים'
 
   return (
     <div className="flex flex-col h-full">
@@ -43,15 +54,14 @@ export function RightPanel() {
 
       <div className="flex-1 overflow-y-auto">
         {visibleVideos.length === 0 ? (
-          <div className="p-4 text-xs" style={{ color: 'var(--color-border-soft)' }}>
-            אין סרטונים להצגה
+          <div className="p-4 text-sm" style={{ color: 'var(--color-border-soft)' }}>
+            {hasFilters ? 'אין סרטונים התואמים לבחירה' : 'אין סרטונים להצגה'}
           </div>
         ) : (
           visibleVideos.map((video) => (
             <InstrumentCard
               key={video.id}
               video={video}
-              targetCategory={selectedCategory}
               isPreviewed={previewedVideoId === video.id}
             />
           ))
