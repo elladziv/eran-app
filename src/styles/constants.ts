@@ -20,7 +20,7 @@ export const ORCHESTRA_ARC_START_DEG = 180; // left end of semicircle
 export const ORCHESTRA_ARC_END_DEG   = 0;   // right end
 
 // Composer / timeline
-export const TIMELINE_DURATION_S  = 30;
+export const TIMELINE_DURATION_S  = 35;
 export const TIMELINE_SNAP_S      = 0.25;
 export const COMPOSER_MAX_TRACKS  = 10;
 

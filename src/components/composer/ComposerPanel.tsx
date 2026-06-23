@@ -164,7 +164,7 @@ export function ComposerPanel() {
             <div
               className="relative"
               style={{
-                width: TIMELINE_DURATION_S * PX_PER_SECOND + 140,
+                width: TIMELINE_DURATION_S * PX_PER_SECOND + 200,
                 minHeight: totalHeight,
               }}
             >
@@ -177,7 +177,7 @@ export function ComposerPanel() {
                 <div
                   className="shrink-0"
                   style={{
-                    width: 140,
+                    width: 200,
                     height: 28,
                     backgroundColor: 'var(--color-composer-bg)',
                     borderRight: '1px solid var(--color-composer-separator)',

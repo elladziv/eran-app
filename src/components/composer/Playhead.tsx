@@ -8,7 +8,7 @@ export function Playhead({ positionPx, height }: PlayheadProps) {
     <div
       className="absolute top-0 pointer-events-none"
       style={{
-        left: positionPx + 140, // offset by track label width
+        left: positionPx + 200, // offset by track label width
         width: 2,
         height,
         backgroundColor: 'var(--color-accent-gold)',
