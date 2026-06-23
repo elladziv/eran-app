@@ -135,15 +135,16 @@ export const useAppStore = create<AppState>((set, get) => ({
   setMute: (trackId: string, muted: boolean) =>
     set((s) => ({
       tracks: s.tracks.map((t) =>
-        t.id === trackId ? { ...t, isMuted: muted } : t,
+        t.id === trackId ? { ...t, isMuted: muted, isSoloed: muted ? false : t.isSoloed } : t,
       ),
     })),
 
   setSolo: (trackId: string, soloed: boolean) =>
     set((s) => ({
-      tracks: s.tracks.map((t) =>
-        t.id === trackId ? { ...t, isSoloed: soloed } : t,
-      ),
+      tracks: s.tracks.map((t) => {
+        if (t.id === trackId) return { ...t, isSoloed: soloed, isMuted: soloed ? false : t.isMuted }
+        return t
+      }),
     })),
 
   setVolume: (trackId: string, volume: number) =>

@@ -58,8 +58,10 @@ export function VideoPool() {
   useEffect(() => {
     if (!isPlaying) return
 
+    const anySoloed = tracks.some((t) => t.isSoloed)
     tracks.forEach((track) => {
-      if (track.isMuted) return
+      const effectivelyMuted = anySoloed ? !track.isSoloed : track.isMuted
+      if (effectivelyMuted) return
       track.keyframes.forEach((kf) => {
         const delta = playheadS - kf.startS
         if (delta >= 0 && delta < 0.05) {
@@ -73,6 +75,37 @@ export function VideoPool() {
       })
     })
   }, [isPlaying, playheadS, tracks])
+
+  // React immediately to mute/solo changes while playing
+  useEffect(() => {
+    if (!isPlaying) return
+
+    const currentS = useAppStore.getState().playheadS
+    const anySoloed = tracks.some((t) => t.isSoloed)
+
+    tracks.forEach((track) => {
+      const effectivelyMuted = anySoloed ? !track.isSoloed : track.isMuted
+      track.keyframes.forEach((kf) => {
+        const audio = audioRefs.current.get(kf.id)
+        if (!audio) return
+
+        if (effectivelyMuted) {
+          if (!audio.paused) {
+            audio.pause()
+            audio.currentTime = 0
+          }
+        } else {
+          const delta = currentS - kf.startS
+          if (delta >= 0 && delta < kf.durationS && audio.paused) {
+            audio.currentTime = delta
+            audio.volume = track.volume
+            audio.play().catch(() => { /* autoplay blocked */ })
+          }
+        }
+      })
+    })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tracks, isPlaying])
 
   return null
 }

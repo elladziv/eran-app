@@ -187,14 +187,18 @@ export function ComposerPanel() {
                 <TimelineRuler pxPerSecond={PX_PER_SECOND} onSeek={setPlayhead} />
               </div>
 
-              {tracks.map((track) => (
-                <TrackRow
-                  key={track.id}
-                  track={track}
-                  pxPerSecond={PX_PER_SECOND}
-                  rowHeight={TRACK_ROW_HEIGHT}
-                />
-              ))}
+              {(() => {
+                const anySoloed = tracks.some((t) => t.isSoloed)
+                return tracks.map((track) => (
+                  <TrackRow
+                    key={track.id}
+                    track={track}
+                    pxPerSecond={PX_PER_SECOND}
+                    rowHeight={TRACK_ROW_HEIGHT}
+                    isEffectivelyMuted={anySoloed ? !track.isSoloed : track.isMuted}
+                  />
+                ))
+              })()}
             </div>
           </div>
         )}

@@ -7,9 +7,10 @@ interface TrackRowProps {
   track: Track;
   pxPerSecond: number;
   rowHeight: number;
+  isEffectivelyMuted: boolean;
 }
 
-export function TrackRow({ track, pxPerSecond, rowHeight }: TrackRowProps) {
+export function TrackRow({ track, pxPerSecond, rowHeight, isEffectivelyMuted }: TrackRowProps) {
   const addKeyframe = useAppStore((s) => s.addKeyframe);
   const removeKeyframe = useAppStore((s) => s.removeKeyframe);
   const removeTrack = useAppStore((s) => s.removeTrack);
@@ -41,6 +42,8 @@ export function TrackRow({ track, pxPerSecond, rowHeight }: TrackRowProps) {
           width: 200,
           backgroundColor: "var(--color-composer-bg)",
           borderRight: "1px solid var(--color-composer-separator)",
+          opacity: isEffectivelyMuted ? 0.45 : 1,
+          transition: "opacity 0.15s ease",
         }}
       >
         <img
@@ -51,7 +54,7 @@ export function TrackRow({ track, pxPerSecond, rowHeight }: TrackRowProps) {
         />
         <span
           className="flex-1 text-xs truncate"
-          style={{ color: "var(--color-surface-card)" }}
+          style={{ color: isEffectivelyMuted ? "var(--color-border-soft)" : "var(--color-surface-card)" }}
         >
           {track.instrument.name}
         </span>
@@ -108,9 +111,11 @@ export function TrackRow({ track, pxPerSecond, rowHeight }: TrackRowProps) {
         className="relative overflow-hidden"
         style={{
           width: timelineWidth,
-          backgroundColor: track.isMuted
+          backgroundColor: isEffectivelyMuted
             ? "rgba(59,59,60,0.4)"
             : "var(--color-composer-bg)",
+          opacity: isEffectivelyMuted ? 0.55 : 1,
+          transition: "opacity 0.15s ease, background-color 0.15s ease",
           cursor: "crosshair",
         }}
         onClick={handleTrackClick}
