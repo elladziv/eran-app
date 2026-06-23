@@ -15,9 +15,12 @@ export function TabSwitcher({ activeTab, onChange }: TabSwitcherProps) {
     <div
       className="inline-flex"
       style={{
+        position: "absolute",
+        left: 0,
+        bottom: 0,
+        marginBottom: "-12px",
         alignSelf: "flex-end",
         borderTopRightRadius: "3px",
-        overflow: "hidden",
       }}
     >
       {(["orchestra", "geo"] as AppTab[]).map((tab) => {

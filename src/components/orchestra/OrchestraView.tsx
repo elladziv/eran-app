@@ -4,6 +4,7 @@ import { type OrchestraCategory, type OrchestraSlot } from '../../types'
 import { ORCHESTRA_CENTER_X, ORCHESTRA_CENTER_Y, ORCHESTRA_ZONE_RADII } from '../../styles/constants'
 import { buildArcSlicePath } from '../../utils/arcPath'
 import { ArcZone } from './ArcZone'
+import { RotaryKnob } from './RotaryKnob'
 
 const CATEGORIES: OrchestraCategory[] = ['megaphones', 'string', 'brass', 'percussion', 'chorus']
 
@@ -77,24 +78,10 @@ export function OrchestraView() {
   return (
     <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
 
-      {/* Mode toggle — right side */}
-      <button
-        onClick={() => setOrchestraMode(orchestraMode === 'edit' ? 'play' : 'edit')}
-        className="absolute top-3 z-10 rounded-full text-sm font-medium transition-all"
-        style={{
-          right: 12,
-          padding: '4px 12px',
-          backgroundColor: orchestraMode === 'play'
-            ? 'var(--color-accent-brown)'
-            : 'var(--color-surface-card)',
-          color: orchestraMode === 'play'
-            ? 'var(--color-surface-inner)'
-            : 'var(--color-text-secondary)',
-          border: '1px solid var(--color-border-soft)',
-        }}
-      >
-        {orchestraMode === 'play' ? 'מצב נגינה' : 'מצב סינון'}
-      </button>
+      {/* Rotary knob — right side */}
+      <div className="absolute top-3 z-10" style={{ right: 12 }}>
+        <RotaryKnob />
+      </div>
 
         {/* Mini audio player — left side, play mode only */}
         {orchestraMode === 'play' && (

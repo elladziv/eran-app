@@ -32,7 +32,7 @@ export default function App() {
         style={{
           maxWidth: 1440,
           minHeight: "calc(100vh - 40px)",
-          backgroundColor: "var(--color-surface-card)",
+          backgroundColor: "var(--color-surface-inner)",
           boxShadow: "0 8px 60px rgba(0,0,0,0.18)",
         }}
       >

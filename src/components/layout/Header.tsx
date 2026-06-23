@@ -11,7 +11,10 @@ interface HeaderProps {
 export function Header({ activeTab, onTabChange }: HeaderProps) {
   return (
     <div id="header" className=" pb-0 shrink-0">
-      <Card className="overflow-hidden flex flex-col" style={{ padding: 0 }}>
+      <Card
+        className="flex flex-col"
+        style={{ padding: 0, position: "relative" }}
+      >
         {/* Top row — flex with RTL direction (inherited from html[dir=rtl]).
             In RTL flex-row: first child = right, last child = left.
             Logo first → appears on RIGHT. Language last → appears on LEFT. */}
