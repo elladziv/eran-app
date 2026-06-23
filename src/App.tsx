@@ -57,7 +57,7 @@ export default function App() {
             {/* Central map — appears on the LEFT in RTL */}
             <Card
               id="map-view"
-              className="flex-1 overflow-hidden"
+              className="flex-1 overflow-hidden main-card"
               style={{ backgroundColor: "var(--color-surface-inner)" }}
             >
               {activeTab === "orchestra" ? <OrchestraView /> : <GeoView />}

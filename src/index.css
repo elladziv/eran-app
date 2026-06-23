@@ -113,6 +113,10 @@ a {
   color: inherit;
 }
 
+.main-card {
+  max-height: calc(100vh - 234px);
+}
+
 /* ── Scrollbar ──────────────────────────────────────────────────────── */
 ::-webkit-scrollbar {
   width: 4px;
