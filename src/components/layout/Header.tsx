@@ -1,7 +1,7 @@
 import { Card } from "../shared/Card";
 import { TabSwitcher, type AppTab } from "./TabSwitcher";
 
-const NAV_LINKS = ["אודות", "הוספת רדיו לארכיון", "קטעי תחקור", "ארכיון הקשבה"];
+const NAV_LINKS = ["אודות", "הוספת וידאו לארכיון", "קטעי תזמור", "ארכיון השטח"];
 
 interface HeaderProps {
   activeTab: AppTab;

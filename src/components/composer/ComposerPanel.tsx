@@ -1,71 +1,73 @@
-import { useEffect, useRef, useCallback } from 'react'
-import { useAppStore } from '../../store/useAppStore'
-import { TIMELINE_DURATION_S } from '../../styles/constants'
-import { TimelineRuler } from './TimelineRuler'
-import { TrackRow } from './TrackRow'
-import { Playhead } from './Playhead'
-import { MixerInstrumentPicker } from './MixerInstrumentPicker'
+import { useEffect, useRef, useCallback } from "react";
+import { useAppStore } from "../../store/useAppStore";
+import { TIMELINE_DURATION_S } from "../../styles/constants";
+import { TimelineRuler } from "./TimelineRuler";
+import { TrackRow } from "./TrackRow";
+import { Playhead } from "./Playhead";
+import { MixerInstrumentPicker } from "./MixerInstrumentPicker";
 
-const PX_PER_SECOND   = 30
-const TRACK_ROW_HEIGHT = 44
+const PX_PER_SECOND = 30;
+const TRACK_ROW_HEIGHT = 44;
 
 export function ComposerPanel() {
-  const tracks         = useAppStore((s) => s.tracks)
-  const isPlaying      = useAppStore((s) => s.isPlaying)
-  const playheadS      = useAppStore((s) => s.playheadS)
-  const setPlaying     = useAppStore((s) => s.setPlaying)
-  const setPlayhead    = useAppStore((s) => s.setPlayhead)
-  const toggleComposer = useAppStore((s) => s.toggleComposer)
+  const tracks = useAppStore((s) => s.tracks);
+  const isPlaying = useAppStore((s) => s.isPlaying);
+  const playheadS = useAppStore((s) => s.playheadS);
+  const setPlaying = useAppStore((s) => s.setPlaying);
+  const setPlayhead = useAppStore((s) => s.setPlayhead);
+  const toggleComposer = useAppStore((s) => s.toggleComposer);
 
-  const rafRef      = useRef<number | null>(null)
-  const lastTimeRef = useRef<number | null>(null)
+  const rafRef = useRef<number | null>(null);
+  const lastTimeRef = useRef<number | null>(null);
 
   const tick = useCallback(
     (now: number) => {
-      if (lastTimeRef.current === null) lastTimeRef.current = now
-      const delta = (now - lastTimeRef.current) / 1000
-      lastTimeRef.current = now
+      if (lastTimeRef.current === null) lastTimeRef.current = now;
+      const delta = (now - lastTimeRef.current) / 1000;
+      lastTimeRef.current = now;
 
-      const currentS = useAppStore.getState().playheadS
-      const next = currentS + delta
+      const currentS = useAppStore.getState().playheadS;
+      const next = currentS + delta;
 
       if (next >= TIMELINE_DURATION_S) {
-        setPlayhead(0)
-        setPlaying(false)
-        lastTimeRef.current = null
-        return
+        setPlayhead(0);
+        setPlaying(false);
+        lastTimeRef.current = null;
+        return;
       }
-      setPlayhead(next)
-      rafRef.current = requestAnimationFrame(tick)
+      setPlayhead(next);
+      rafRef.current = requestAnimationFrame(tick);
     },
     [setPlayhead, setPlaying],
-  )
+  );
 
   useEffect(() => {
     if (isPlaying) {
-      rafRef.current = requestAnimationFrame(tick)
+      rafRef.current = requestAnimationFrame(tick);
     } else {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current)
-      lastTimeRef.current = null
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      lastTimeRef.current = null;
     }
-    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current) }
-  }, [isPlaying, tick])
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, [isPlaying, tick]);
 
   const handlePlayPause = () => {
     if (isPlaying) {
-      setPlaying(false)
+      setPlaying(false);
     } else {
-      if (playheadS >= TIMELINE_DURATION_S) setPlayhead(0)
-      setPlaying(true)
+      if (playheadS >= TIMELINE_DURATION_S) setPlayhead(0);
+      setPlaying(true);
     }
-  }
+  };
 
   const handleStop = () => {
-    setPlaying(false)
-    setPlayhead(0)
-  }
+    setPlaying(false);
+    setPlayhead(0);
+  };
 
-  const totalHeight = tracks.length * TRACK_ROW_HEIGHT + 28
+  const totalHeight = tracks.length * TRACK_ROW_HEIGHT + 28;
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -74,8 +76,8 @@ export function ComposerPanel() {
         className="flex items-center px-5 shrink-0"
         style={{
           height: 52,
-          borderBottom: '1px solid var(--color-composer-separator)',
-          backgroundColor: 'var(--color-composer-bg)',
+          borderBottom: "1px solid var(--color-composer-separator)",
+          backgroundColor: "var(--color-composer-bg)",
         }}
       >
         {/* Left: playback controls + time */}
@@ -84,38 +86,64 @@ export function ComposerPanel() {
             onClick={handlePlayPause}
             className="flex items-center justify-center rounded-full transition-opacity hover:opacity-80"
             style={{
+              position: "relative",
               width: 36,
               height: 36,
-              backgroundColor: isPlaying ? 'var(--color-accent-gold)' : 'var(--color-accent-brown)',
-              color: 'var(--color-surface-inner)',
+              backgroundColor: isPlaying
+                ? "var(--color-accent-gold)"
+                : "var(--color-accent-brown)",
+              color: "var(--color-surface-inner)",
               fontSize: 15,
             }}
           >
-            {isPlaying ? '⏸' : '▶'}
+            <span
+              style={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                fontSize: "16px",
+                marginTop: "2px",
+              }}
+            >
+              {isPlaying ? "⏸" : "▶"}
+            </span>
           </button>
 
           <button
             onClick={handleStop}
             className="flex items-center justify-center rounded-full transition-opacity hover:opacity-80"
             style={{
+              position: "relative",
               width: 36,
               height: 36,
-              backgroundColor: 'transparent',
-              color: 'var(--color-border-soft)',
-              border: '1px solid var(--color-composer-separator)',
+              backgroundColor: "transparent",
+              color: "var(--color-border-soft)",
+              border: "1px solid var(--color-composer-separator)",
               fontSize: 15,
             }}
           >
-            ■
+            <span
+              style={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                fontSize: "32px",
+                marginTop: "1px",
+              }}
+            >
+              ■
+            </span>
           </button>
 
           <span
             className="text-base font-medium tabular-nums"
-            style={{ color: 'var(--color-surface-card)' }}
+            style={{ color: "var(--color-surface-card)" }}
           >
-            {String(Math.floor(playheadS / 60)).padStart(2, '0')}:
-            {String(Math.floor(playheadS % 60)).padStart(2, '0')}.
-            {String(Math.floor((playheadS % 1) * 10)).padStart(1, '0')}
+            {String(Math.floor(playheadS / 60)).padStart(2, "0")}:
+            {String(Math.floor(playheadS % 60)).padStart(2, "0")}.
+            {String(Math.floor((playheadS % 1) * 10)).padStart(1, "0")}
           </span>
         </div>
 
@@ -124,20 +152,32 @@ export function ComposerPanel() {
           onClick={toggleComposer}
           className="flex items-center gap-1.5 rounded-full text-sm transition-opacity hover:opacity-70 shrink-0"
           style={{
-            padding: '4px 12px',
-            color: 'var(--color-border-soft)',
-            border: '1px solid var(--color-composer-separator)',
+            padding: "4px 12px",
+            color: "var(--color-border-soft)",
+            border: "1px solid var(--color-composer-separator)",
           }}
         >
-          <span style={{ fontSize: 16, lineHeight: 1, display: 'inline-block', transform: 'rotate(90deg)' }}>›</span>
+          <span
+            style={{
+              fontSize: 16,
+              lineHeight: 1,
+              display: "inline-block",
+              transform: "rotate(90deg)",
+            }}
+          >
+            ›
+          </span>
           סגרו
         </button>
 
         {/* Right: track count */}
         <div className="flex-1 flex justify-end">
-          <span className="text-sm" style={{ color: 'var(--color-border-soft)' }}>
+          <span
+            className="text-sm"
+            style={{ color: "var(--color-border-soft)" }}
+          >
             {tracks.length === 0
-              ? 'הוסף כלים מהרשימה להלחנה'
+              ? "הוסף כלים מהרשימה להלחנה"
               : `${tracks.length} קטעים`}
           </span>
         </div>
@@ -152,14 +192,14 @@ export function ComposerPanel() {
         {tracks.length === 0 ? (
           <div
             className="flex-1 flex items-center justify-center text-sm"
-            style={{ color: 'var(--color-border-soft)' }}
+            style={{ color: "var(--color-border-soft)" }}
           >
             בחר כלי מהרשימה מימין כדי להתחיל להלחין
           </div>
         ) : (
           <div
             className="flex-1 overflow-auto relative"
-            style={{ direction: 'ltr' }}
+            style={{ direction: "ltr" }}
           >
             <div
               className="relative"
@@ -179,30 +219,35 @@ export function ComposerPanel() {
                   style={{
                     width: 200,
                     height: 28,
-                    backgroundColor: 'var(--color-composer-bg)',
-                    borderRight: '1px solid var(--color-composer-separator)',
-                    borderBottom: '1px solid var(--color-composer-separator)',
+                    backgroundColor: "var(--color-composer-bg)",
+                    borderRight: "1px solid var(--color-composer-separator)",
+                    borderBottom: "1px solid var(--color-composer-separator)",
                   }}
                 />
-                <TimelineRuler pxPerSecond={PX_PER_SECOND} onSeek={setPlayhead} />
+                <TimelineRuler
+                  pxPerSecond={PX_PER_SECOND}
+                  onSeek={setPlayhead}
+                />
               </div>
 
               {(() => {
-                const anySoloed = tracks.some((t) => t.isSoloed)
+                const anySoloed = tracks.some((t) => t.isSoloed);
                 return tracks.map((track) => (
                   <TrackRow
                     key={track.id}
                     track={track}
                     pxPerSecond={PX_PER_SECOND}
                     rowHeight={TRACK_ROW_HEIGHT}
-                    isEffectivelyMuted={anySoloed ? !track.isSoloed : track.isMuted}
+                    isEffectivelyMuted={
+                      anySoloed ? !track.isSoloed : track.isMuted
+                    }
                   />
-                ))
+                ));
               })()}
             </div>
           </div>
         )}
       </div>
     </div>
-  )
+  );
 }
