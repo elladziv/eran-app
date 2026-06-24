@@ -23,11 +23,14 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
           style={{ minHeight: 76 }}
         >
           {/* Logo — DOM first → visual RIGHT in RTL */}
-          <img
-            src="/main-logo.svg"
-            alt="סאונד אוף פרוטסט"
-            className="h-12 w-auto"
-          />
+          <div className="flex items-center">
+            <img
+              src="/main-logo.svg"
+              alt="סאונד אוף פרוטסט"
+              className="h-12 w-auto"
+              style={{ transform: "scale(1.5) translateX(-12%)" }}
+            />
+          </div>
 
           {/* Nav links — center */}
           <nav className="flex gap-8">
@@ -49,9 +52,13 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
           {/* Language switcher — DOM last → visual LEFT in RTL */}
           <div
             className="text-sm"
-            style={{ color: "var(--color-text-secondary)", fontWeight: 500 }}
+            style={{
+              color: "var(--color-text-secondary)",
+              fontWeight: 500,
+            }}
           >
-            עברית&nbsp;|&nbsp;English
+            {/* עברית&nbsp;|&nbsp;English*/}
+            &nbsp;
           </div>
         </div>
 
